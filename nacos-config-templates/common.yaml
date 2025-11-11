@@ -1,0 +1,16 @@
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+logging:
+  level:
+    com.codereview: debug
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

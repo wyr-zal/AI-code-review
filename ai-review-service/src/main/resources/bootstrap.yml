@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: ai-review-service
+  cloud:
+    nacos:
+      server-addr: 192.168.100.128:8848
+      discovery:
+        namespace: 8f3b736b-7758-431d-ac34-a6eca5bb7474
+#        ip-type: IPv4
+      config:
+        group: DEFAULT_GROUP
+        namespace: 8f3b736b-7758-431d-ac34-a6eca5bb7474
+        file-extension: yaml
+        prefix: ${CONFIG_PREFIX:${spring.application.name}}
+        shared-configs:
+          - data-id: shared-common.yaml
+            refresh: true
+          - data-id: shared-datasource.yaml
+            refresh: true
+          - data-id: shared-redis.yaml
+            refresh: true
+          - data-id: shared-mq.yaml
+            refresh: true
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}

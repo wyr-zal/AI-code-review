@@ -1,0 +1,94 @@
+package com.codereview.review.controller;
+
+import com.codereview.common.result.Result;
+import com.codereview.common.utils.JwtUtils;
+import com.codereview.review.dto.CodeReviewRequestDTO;
+import com.codereview.review.dto.PageResponseDTO;
+import com.codereview.review.entity.ReviewTask;
+import com.codereview.review.service.ReviewService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.validation.Valid;
+
+/**
+ * 代码审查控制器
+ * @author CodeReview
+ */
+@Slf4j
+@RestController
+@RequestMapping("/review")
+@Tag(name = "代码审查", description = "代码审查相关接口")
+public class ReviewController {
+
+    @Resource
+    private ReviewService reviewService;
+
+    /**
+     * 提交代码审查任务
+     */
+    @Operation(summary = "提交代码审查任务（异步）", description = "提交代码到队列进行异步审查，返回任务ID")
+    @PostMapping("/submit")
+    public Result<Long> submitReview(
+            @Parameter(description = "代码审查请求", required = true) @Valid @RequestBody CodeReviewRequestDTO dto,
+            @Parameter(description = "用户认证token", required = true) @RequestHeader("Authorization") String token) {
+        String userId = JwtUtils.getUserId(token);
+        Long taskId = reviewService.submitReviewTask(dto, Long.parseLong(userId));
+        return Result.success("任务提交成功", taskId);
+    }
+
+    /**
+     * 同步执行代码审查
+     */
+    @Operation(summary = "同步代码审查", description = "立即执行代码审查并返回结果，耗时较长")
+    @PostMapping("/sync")
+    public Result<ReviewTask> syncReview(
+            @Parameter(description = "代码审查请求", required = true) @Valid @RequestBody CodeReviewRequestDTO dto,
+            @Parameter(description = "用户认证token", required = true) @RequestHeader("Authorization") String token) {
+        String userId = JwtUtils.getUserId(token);
+        ReviewTask task = reviewService.executeSyncReview(dto, Long.parseLong(userId));
+        return Result.success("审查完成", task);
+    }
+
+    /**
+     * 获取审查任务详情
+     */
+    @Operation(summary = "获取任务详情", description = "根据任务ID获取代码审查任务的详细信息")
+    @GetMapping("/task/{taskId}")
+    public Result<ReviewTask> getTaskDetail(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId) {
+        ReviewTask task = reviewService.getTaskDetail(taskId);
+        return Result.success(task);
+    }
+
+    /**
+     * 获取用户的审查任务列表
+     */
+    @Operation(summary = "获取审查任务列表", description = "分页查询当前用户的所有代码审查任务")
+    @GetMapping("/tasks")
+    public Result<PageResponseDTO<ReviewTask>> getUserTasks(
+            @Parameter(description = "用户认证token", required = true) @RequestHeader("Authorization") String token,
+            @Parameter(description = "页码", example = "1") @RequestParam(defaultValue = "1") Integer page,
+            @Parameter(description = "每页大小", example = "10") @RequestParam(defaultValue = "10") Integer size) {
+        String userId = JwtUtils.getUserId(token);
+        PageResponseDTO<ReviewTask> tasks = reviewService.getUserTasks(Long.parseLong(userId), page, size);
+        return Result.success(tasks);
+    }
+
+    /**
+     * 删除审查任务
+     */
+    @Operation(summary = "删除审查任务", description = "删除指定的代码审查任务")
+    @DeleteMapping("/task/{taskId}")
+    public Result<String> deleteTask(
+            @Parameter(description = "任务ID", required = true) @PathVariable Long taskId,
+            @Parameter(description = "用户认证token", required = true) @RequestHeader("Authorization") String token) {
+        String userId = JwtUtils.getUserId(token);
+        reviewService.deleteTask(taskId, Long.parseLong(userId));
+        return Result.success("删除成功", "删除成功");
+    }
+}

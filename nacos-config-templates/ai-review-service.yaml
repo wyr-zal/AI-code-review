@@ -1,0 +1,22 @@
+server:
+  port: 8002
+
+spring:
+  application:
+    name: ai-review-service
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: YOUR_NACOS_ADDR   # 例: 127.0.0.1:8848
+        ip: 127.0.0.1
+
+ai:
+  openai:
+    api-key: YOUR_OPENAI_API_KEY
+    api-url: https://apis.iflow.cn/v1/chat/completions
+    model: Qwen3-Coder
+  claude:
+    api-key: YOUR_CLAUDE_API_KEY
+    api-url: https://api.anthropic.com/v1/messages
+    model: claude-3-opus-20240229

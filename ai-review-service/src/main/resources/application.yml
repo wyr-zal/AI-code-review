@@ -1,0 +1,10 @@
+server:
+  port: 8002
+
+# AI配置
+#ai:
+#  openai:
+#    api-key: ${OPENAI_API_KEY:}
+#    api-url: ${OPENAI_API_URL:https://apis.iflow.cn/v1/chat/completions}
+#    model: Qwen3-Coder  # iFlow平台的代码专用模型，256k上下文
+

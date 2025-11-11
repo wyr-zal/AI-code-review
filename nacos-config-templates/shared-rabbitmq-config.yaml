@@ -1,0 +1,12 @@
+spring:
+  rabbitmq:
+    host: YOUR_RABBITMQ_HOST
+    port: 5672
+    username: YOUR_RABBITMQ_USER
+    password: YOUR_RABBITMQ_PASSWORD
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: auto
+        concurrency: 3
+        max-concurrency: 10

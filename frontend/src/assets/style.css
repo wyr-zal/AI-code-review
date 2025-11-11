@@ -1,0 +1,79 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 代码编辑器容器 */
+.code-editor {
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* 卡片标题 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 状态标签 */
+.status-tag {
+  font-size: 12px;
+}
+
+/* 评分进度条 */
+.score-progress {
+  margin: 10px 0;
+}
+
+/* 问题列表 */
+.issue-list {
+  margin-top: 20px;
+}
+
+.issue-item {
+  padding: 15px;
+  margin-bottom: 10px;
+  border-left: 3px solid #409eff;
+  background: #f5f7fa;
+  border-radius: 4px;
+}
+
+.issue-item.high {
+  border-left-color: #f56c6c;
+}
+
+.issue-item.medium {
+  border-left-color: #e6a23c;
+}
+
+.issue-item.low {
+  border-left-color: #67c23a;
+}

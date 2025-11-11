@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo:*)",
+      "Bash(\"E:\\project\\AI-project\\ai-code-review-platform\\frontend\\.env\")",
+      "Bash(\"E:\\project\\AI-project\\ai-code-review-platform\\frontend\\.env.production\")",
+      "Bash(\"E:\\project\\AI-project\\ai-code-review-platform\\frontend\\.gitignore\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

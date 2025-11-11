@@ -1,0 +1,56 @@
+server:
+  port: 8000
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # 用户服务路由
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=1
+
+        # AI审查服务路由
+        - id: ai-review-service
+          uri: lb://ai-review-service
+          predicates:
+            - Path=/api/review/**
+          filters:
+            - StripPrefix=1
+
+      # 全局跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
+
+    sentinel:
+      transport:
+        dashboard: localhost:8090
+        port: 8719
+
+# 日志配置
+logging:
+  level:
+    com.codereview: debug
+    # Gateway核心日志
+    org.springframework.cloud.gateway: DEBUG
+    # LoadBalancer日志
+    org.springframework.cloud.loadbalancer: DEBUG
+    # Nacos服务发现日志
+    com.alibaba.nacos.client: DEBUG
+    # Reactor Netty日志
+    reactor.netty.http.client: DEBUG
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n'
