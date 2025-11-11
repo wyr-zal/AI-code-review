@@ -21,6 +21,11 @@ public interface ReviewService {
     ReviewTask executeSyncReview(CodeReviewRequestDTO dto, Long userId);
 
     /**
+     * 执行异步审查（处理MQ队列中的任务）
+     */
+    void executeAsyncReview(Long taskId);
+
+    /**
      * 获取审查任务详情
      */
     ReviewTask getTaskDetail(Long taskId);

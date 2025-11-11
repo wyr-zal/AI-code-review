@@ -95,6 +95,19 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public void executeAsyncReview(Long taskId) {
+        // 获取已存在的任务
+        ReviewTask task = reviewTaskMapper.selectById(taskId);
+        if (task == null) {
+            log.error("任务不存在: taskId={}", taskId);
+            throw new BusinessException("任务不存在");
+        }
+
+        // 执行审查
+        executeReview(task);
+    }
+
+    @Override
     public ReviewTask getTaskDetail(Long taskId) {
         ReviewTask task = reviewTaskMapper.selectById(taskId);
         if (task == null) {

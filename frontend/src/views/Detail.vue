@@ -30,7 +30,7 @@
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="创建时间">
-            {{ formatDateTime(taskDetail.createTime) }}
+            {{ formatDate(taskDetail.createTime) }}
           </el-descriptions-item>
         </el-descriptions>
       </el-card>
@@ -139,6 +139,36 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getReviewTask } from '@/api/review'
 import { ElMessage } from 'element-plus'
+import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat'
+dayjs.extend(customParseFormat)
+
+// Robust date formatter for various backend shapes
+const formatDate = (dateTime) => {
+  if (dateTime === null || dateTime === undefined) return '-'
+  try {
+    let d
+    if (Array.isArray(dateTime)) {
+      const [year, month, day, hour = 0, minute = 0, second = 0] = dateTime
+      d = dayjs(new Date(year, (month || 1) - 1, day || 1, hour, minute, second))
+    } else if (typeof dateTime === 'number') {
+      d = dayjs(dateTime)
+    } else if (typeof dateTime === 'string') {
+      const normalized = dateTime.includes('T') ? dateTime : dateTime.replace(' ', 'T')
+      d = dayjs(normalized)
+      if (!d.isValid()) d = dayjs(dateTime, 'YYYY-MM-DD HH:mm:ss')
+    } else if (dateTime instanceof Date) {
+      d = dayjs(dateTime)
+    } else {
+      return String(dateTime)
+    }
+    if (!d || !d.isValid()) return '-'
+    return d.format('YYYY-MM-DD HH:mm:ss')
+  } catch (e) {
+    console.error('formatDate failed:', e, dateTime)
+    return '-'
+  }
+}
 
 const router = useRouter()
 const route = useRoute()

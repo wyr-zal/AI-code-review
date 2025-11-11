@@ -45,15 +45,8 @@ public class ReviewTaskListener {
                 return;
             }
 
-            // 构建DTO并执行审查
-            CodeReviewRequestDTO dto = new CodeReviewRequestDTO();
-            dto.setTitle(task.getTitle());
-            dto.setCodeContent(task.getCodeContent());
-            dto.setLanguage(task.getLanguage());
-            dto.setAiModel(task.getAiModel());
-            dto.setAsync(false);
-
-            reviewService.executeSyncReview(dto, task.getUserId());
+            // 直接执行已存在任务的审查，不再创建新任务
+            reviewService.executeAsyncReview(taskId);
 
             log.info("代码审查任务处理完成: taskId={}", taskId);
 
