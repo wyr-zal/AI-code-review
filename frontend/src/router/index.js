@@ -68,19 +68,64 @@ router.beforeEach((to, from, next) => {
   // 需要登录的页面
   if (to.meta.requiresAuth) {
     if (token) {
-      next()
+      // 验证token是否过期
+      if (isTokenExpired(token)) {
+        ElMessage.warning('登录已过期，请重新登录')
+        localStorage.removeItem('token')
+        localStorage.removeItem('userInfo')
+        next('/login')
+      } else {
+        next()
+      }
     } else {
       ElMessage.warning('请先登录')
       next('/login')
     }
   } else {
     // 已登录用户访问登录页，重定向到控制台
-    if (to.path === '/login' && token) {
+    if (to.path === '/login' && token && !isTokenExpired(token)) {
       next('/dashboard')
     } else {
       next()
     }
   }
 })
+
+/**
+ * 检查JWT是否过期
+ * @param {string} token - JWT token
+ * @returns {boolean} true表示已过期，false表示未过期
+ */
+function isTokenExpired(token) {
+  if (!token) return true
+
+  try {
+    // JWT格式：header.payload.signature
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      return true
+    }
+
+    // 解码payload部分
+    const payload = JSON.parse(atob(parts[1]))
+
+    // 检查是否有exp字段
+    if (!payload.exp) {
+      // 如果没有过期时间，认为token有效
+      return false
+    }
+
+    // exp是秒级时间戳，需要转换为毫秒
+    const expTime = payload.exp * 1000
+    const currentTime = Date.now()
+
+    // 如果当前时间超过过期时间，返回true
+    return currentTime >= expTime
+  } catch (error) {
+    console.error('Token解析失败:', error)
+    // 解析失败认为token无效
+    return true
+  }
+}
 
 export default router

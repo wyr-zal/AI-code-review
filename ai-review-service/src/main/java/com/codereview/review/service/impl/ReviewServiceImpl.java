@@ -10,6 +10,7 @@ import com.codereview.common.exception.BusinessException;
 import com.codereview.common.utils.RedisUtils;
 import com.codereview.review.dto.CodeReviewRequestDTO;
 import com.codereview.review.dto.PageResponseDTO;
+import com.codereview.review.dto.ReviewTaskQueryDTO;
 import com.codereview.review.entity.ReviewTask;
 import com.codereview.review.mapper.ReviewTaskMapper;
 import com.codereview.review.service.ReviewService;
@@ -117,10 +118,21 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public PageResponseDTO<ReviewTask> getUserTasks(Long userId, Integer page, Integer size) {
-        Page<ReviewTask> pageParam = new Page<>(page, size);
+    public PageResponseDTO<ReviewTask> getUserTasks(Long userId, ReviewTaskQueryDTO queryDTO) {
+        Page<ReviewTask> pageParam = new Page<>(queryDTO.getPage(), queryDTO.getSize());
         LambdaQueryWrapper<ReviewTask> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ReviewTask::getUserId, userId);
+
+        // 添加状态筛选
+        if (queryDTO.getStatus() != null) {
+            wrapper.eq(ReviewTask::getStatus, queryDTO.getStatus());
+        }
+
+        // 添加语言筛选
+        if (queryDTO.getLanguage() != null && !queryDTO.getLanguage().trim().isEmpty()) {
+            wrapper.eq(ReviewTask::getLanguage, queryDTO.getLanguage());
+        }
+
         wrapper.orderByDesc(ReviewTask::getCreateTime);
 
         Page<ReviewTask> result = reviewTaskMapper.selectPage(pageParam, wrapper);
@@ -129,8 +141,8 @@ public class ReviewServiceImpl implements ReviewService {
         PageResponseDTO<ReviewTask> response = new PageResponseDTO<>();
         response.setRecords(result.getRecords());
         response.setTotal(result.getTotal());
-        response.setPage(page);
-        response.setSize(size);
+        response.setPage(queryDTO.getPage());
+        response.setSize(queryDTO.getSize());
 
         return response;
     }

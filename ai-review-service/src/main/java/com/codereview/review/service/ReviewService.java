@@ -2,6 +2,7 @@ package com.codereview.review.service;
 
 import com.codereview.review.dto.CodeReviewRequestDTO;
 import com.codereview.review.dto.PageResponseDTO;
+import com.codereview.review.dto.ReviewTaskQueryDTO;
 import com.codereview.review.entity.ReviewTask;
 
 /**
@@ -33,7 +34,7 @@ public interface ReviewService {
     /**
      * 获取用户的审查任务列表
      */
-    PageResponseDTO<ReviewTask> getUserTasks(Long userId, Integer page, Integer size);
+    PageResponseDTO<ReviewTask> getUserTasks(Long userId, ReviewTaskQueryDTO queryDTO);
 
     /**
      * 删除审查任务

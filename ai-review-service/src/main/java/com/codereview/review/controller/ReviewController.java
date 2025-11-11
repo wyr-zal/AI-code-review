@@ -4,6 +4,7 @@ import com.codereview.common.result.Result;
 import com.codereview.common.utils.JwtUtils;
 import com.codereview.review.dto.CodeReviewRequestDTO;
 import com.codereview.review.dto.PageResponseDTO;
+import com.codereview.review.dto.ReviewTaskQueryDTO;
 import com.codereview.review.entity.ReviewTask;
 import com.codereview.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,10 +73,9 @@ public class ReviewController {
     @GetMapping("/tasks")
     public Result<PageResponseDTO<ReviewTask>> getUserTasks(
             @Parameter(description = "用户认证token", required = true) @RequestHeader("Authorization") String token,
-            @Parameter(description = "页码", example = "1") @RequestParam(defaultValue = "1") Integer page,
-            @Parameter(description = "每页大小", example = "10") @RequestParam(defaultValue = "10") Integer size) {
+            ReviewTaskQueryDTO queryDTO) {
         String userId = JwtUtils.getUserId(token);
-        PageResponseDTO<ReviewTask> tasks = reviewService.getUserTasks(Long.parseLong(userId), page, size);
+        PageResponseDTO<ReviewTask> tasks = reviewService.getUserTasks(Long.parseLong(userId), queryDTO);
         return Result.success(tasks);
     }
 
