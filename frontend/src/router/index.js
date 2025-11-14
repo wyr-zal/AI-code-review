@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/dashboard'
   },
   {
     path: '/login',

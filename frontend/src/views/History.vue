@@ -323,19 +323,221 @@ const formatDateTime = (dateTime) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.history-page :deep(.el-card) {
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.history-page :deep(.el-card__header) {
+  background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px 24px;
+}
+
+.history-page :deep(.el-card__body) {
+  padding: 24px;
 }
 
 .filter-bar {
   display: flex;
-  gap: 15px;
+  gap: 16px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-bar :deep(.el-select),
+.filter-bar :deep(.el-input) {
+  min-width: 180px;
+}
+
+.filter-bar :deep(.el-input__wrapper) {
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.filter-bar :deep(.el-input__wrapper:hover) {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.filter-bar :deep(.el-button) {
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.filter-bar :deep(.el-button--primary) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.filter-bar :deep(.el-button--primary:hover) {
+  background: linear-gradient(135deg, #7e8fef 0%, #8658b5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.filter-bar :deep(.el-button--default) {
+  border: 2px solid #e2e8f0;
+}
+
+.filter-bar :deep(.el-button--default:hover) {
+  border-color: #667eea;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.history-page :deep(.el-table) {
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+.history-page :deep(.el-table thead) {
+  background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+}
+
+.history-page :deep(.el-table th) {
+  background: transparent;
+  color: #334155;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.history-page :deep(.el-table td) {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.history-page :deep(.el-table__row) {
+  transition: all 0.3s ease;
+}
+
+.history-page :deep(.el-table__row:hover) {
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.03) 0%, transparent 100%);
+  transform: scale(1.01);
+}
+
+.history-page :deep(.el-table__empty-text) {
+  padding: 60px 0;
+  color: #94a3b8;
+  font-size: 15px;
+}
+
+.history-page :deep(.el-tag) {
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-weight: 500;
+  border: none;
+}
+
+.history-page :deep(.el-tag--success) {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.history-page :deep(.el-tag--warning) {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+}
+
+.history-page :deep(.el-tag--danger) {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.history-page :deep(.el-tag--info) {
+  background: linear-gradient(135deg, #a8b5ff 0%, #c4d0fb 100%);
+  color: white;
+}
+
+.history-page :deep(.el-button--small) {
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.history-page :deep(.el-button--primary.el-button--small) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.history-page :deep(.el-button--primary.el-button--small:hover) {
+  background: linear-gradient(135deg, #7e8fef 0%, #8658b5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.history-page :deep(.el-button--danger.el-button--small) {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  color: white;
+}
+
+.history-page :deep(.el-button--danger.el-button--small:hover) {
+  background: linear-gradient(135deg, #f5a3ff 0%, #f7677c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+}
+
+.history-page :deep(.el-button--info.el-button--small),
+.history-page :deep(.el-button--warning.el-button--small) {
+  border: none;
+  color: white;
 }
 
 .pagination {
-  margin-top: 20px;
+  margin-top: 24px;
   display: flex;
   justify-content: flex-end;
+}
+
+.pagination :deep(.el-pagination) {
+  gap: 8px;
+}
+
+.pagination :deep(.el-pager li) {
+  border-radius: 8px;
+  min-width: 36px;
+  height: 36px;
+  line-height: 36px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.pagination :deep(.el-pager li:hover) {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  color: #667eea;
+}
+
+.pagination :deep(.el-pager li.is-active) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.pagination :deep(.btn-prev),
+.pagination :deep(.btn-next) {
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  transition: all 0.3s ease;
+}
+
+.pagination :deep(.btn-prev:hover),
+.pagination :deep(.btn-next:hover) {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  color: #667eea;
 }
 </style>

@@ -319,15 +319,37 @@ const formatDateTime = (dateTime) => {
 .detail-page {
   max-width: 1200px;
   margin: 0 auto;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .page-title {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.detail-page :deep(.el-page-header) {
+  margin-bottom: 24px;
+}
+
+.detail-page :deep(.el-page-header__back) {
+  font-weight: 600;
+  color: #667eea;
 }
 
 .detail-content {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .info-card,
@@ -335,26 +357,75 @@ const formatDateTime = (dateTime) => {
 .result-card,
 .error-card {
   margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover,
+.code-card:hover,
+.result-card:hover,
+.error-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.detail-page :deep(.el-card__header) {
+  background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px 24px;
+  font-weight: 600;
+  font-size: 16px;
+  color: #1a1a2e;
+}
+
+.detail-page :deep(.el-card__body) {
+  padding: 24px;
+}
+
+.detail-page :deep(.el-descriptions) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.detail-page :deep(.el-descriptions__label) {
+  font-weight: 600;
+  color: #334155;
+  background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+}
+
+.detail-page :deep(.el-descriptions__content) {
+  color: #4a5568;
 }
 
 .code-content {
-  background: #f5f7fa;
-  padding: 15px;
-  border-radius: 4px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 12px;
   overflow-x: auto;
-  font-family: 'Courier New', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.8;
   margin: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) inset;
 }
 
 .score-section {
-  margin: 20px 0;
+  margin: 24px 0;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+  border-radius: 16px;
 }
 
 .score-section h3 {
-  margin-bottom: 20px;
-  font-size: 16px;
+  margin-bottom: 24px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
+  text-align: center;
 }
 
 .score-item {
@@ -362,89 +433,157 @@ const formatDateTime = (dateTime) => {
 }
 
 .score-label {
-  margin-bottom: 15px;
-  font-size: 14px;
-  color: #666;
+  margin-bottom: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.detail-page :deep(.el-progress__text) {
+  font-weight: 700;
+  font-size: 18px;
 }
 
 .result-detail {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .summary-section {
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 16px;
+  border-left: 4px solid #667eea;
 }
 
 .summary-section h3 {
-  margin-bottom: 10px;
-  font-size: 16px;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
 }
 
 .summary-section p {
-  line-height: 1.8;
-  color: #666;
+  line-height: 1.9;
+  color: #4a5568;
+  font-size: 15px;
 }
 
 .issues-section,
 .suggestions-section {
-  margin-top: 30px;
+  margin-top: 32px;
 }
 
 .issues-section h3,
 .suggestions-section h3 {
-  margin-bottom: 15px;
-  font-size: 16px;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
 }
 
 .issue-item {
-  padding: 15px;
-  margin-bottom: 15px;
-  border-left: 3px solid #409eff;
-  background: #f5f7fa;
-  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border-left: 4px solid #4a90e2;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.issue-item:hover {
+  transform: translateX(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .issue-item.high {
-  border-left-color: #f56c6c;
-  background: #fef0f0;
+  border-left-color: #f5576c;
+  background: linear-gradient(90deg, rgba(245, 87, 108, 0.03) 0%, white 100%);
 }
 
 .issue-item.medium {
-  border-left-color: #e6a23c;
-  background: #fdf6ec;
+  border-left-color: #ffd93d;
+  background: linear-gradient(90deg, rgba(255, 217, 61, 0.03) 0%, white 100%);
 }
 
 .issue-item.low {
-  border-left-color: #67c23a;
-  background: #f0f9ff;
+  border-left-color: #4facfe;
+  background: linear-gradient(90deg, rgba(79, 172, 254, 0.03) 0%, white 100%);
 }
 
 .issue-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .issue-type {
-  font-weight: 500;
-  color: #333;
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 15px;
 }
 
 .issue-description,
 .issue-suggestion {
-  margin-bottom: 10px;
-  color: #666;
-  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #4a5568;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.issue-suggestion {
+  color: #667eea;
+  font-weight: 500;
 }
 
 .suggestions-section ul {
-  padding-left: 20px;
+  padding-left: 24px;
 }
 
 .suggestions-section li {
-  margin-bottom: 10px;
-  line-height: 1.6;
-  color: #666;
+  margin-bottom: 12px;
+  line-height: 1.8;
+  color: #4a5568;
+  font-size: 15px;
+  position: relative;
+}
+
+.suggestions-section li::marker {
+  color: #667eea;
+  font-weight: bold;
+}
+
+.detail-page :deep(.el-tag) {
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-weight: 500;
+  border: none;
+}
+
+.detail-page :deep(.el-tag--success) {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.detail-page :deep(.el-tag--warning) {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: white;
+}
+
+.detail-page :deep(.el-tag--danger) {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.detail-page :deep(.el-tag--info) {
+  background: linear-gradient(135deg, #a8b5ff 0%, #c4d0fb 100%);
+  color: white;
+}
+
+.detail-page :deep(.el-alert) {
+  border-radius: 12px;
+  border: none;
 }
 </style>

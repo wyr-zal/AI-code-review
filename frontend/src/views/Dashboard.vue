@@ -100,38 +100,74 @@ const handleCommand = (command) => {
 <style scoped>
 .dashboard-container {
   height: 100vh;
+  background: #f7fafc;
 }
 
 .el-aside {
-  background-color: #545c64;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
   overflow-x: hidden;
+  transition: width 0.3s ease;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
 }
 
 .logo {
-  height: 60px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 18px;
-  border-bottom: 1px solid #434a50;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .logo h2 {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
 }
 
 .el-menu {
   border-right: none;
+  background: transparent;
+  padding: 12px;
+}
+
+.el-menu :deep(.el-menu-item) {
+  border-radius: 12px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.el-menu :deep(.el-menu-item:hover) {
+  background: rgba(102, 126, 234, 0.15);
+  transform: translateX(4px);
+}
+
+.el-menu :deep(.el-menu-item.is-active) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.el-menu :deep(.el-menu-item.is-active):hover {
+  transform: translateX(0);
 }
 
 .el-header {
-  background-color: #fff;
-  border-bottom: 1px solid #e6e6e6;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 32px;
+  height: 70px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 10;
 }
 
 .header-content {
@@ -144,9 +180,14 @@ const handleCommand = (command) => {
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  color: #333;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.breadcrumb .el-icon {
+  color: #667eea;
 }
 
 .user-info {
@@ -157,20 +198,69 @@ const handleCommand = (command) => {
 .user-name {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
+  padding: 8px 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: #334155;
 }
 
 .user-name:hover {
-  background-color: #f5f7fa;
+  background: #f1f5f9;
+  transform: translateY(-2px);
+}
+
+.user-name :deep(.el-avatar) {
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.user-name:hover :deep(.el-avatar) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .el-main {
-  background-color: #f0f2f5;
-  padding: 20px;
+  background: #f7fafc;
+  padding: 24px;
   overflow-y: auto;
+  min-height: calc(100vh - 70px);
+}
+
+/* 内容区域淡入动画 */
+.el-main :deep(> *) {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 下拉菜单美化 */
+:deep(.el-dropdown-menu) {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+}
+
+:deep(.el-dropdown-menu__item) {
+  border-radius: 8px;
+  margin: 2px 0;
+  transition: all 0.2s ease;
+}
+
+:deep(.el-dropdown-menu__item:hover) {
+  background: #f1f5f9;
+  color: #667eea;
 }
 </style>

@@ -277,80 +277,231 @@ const goToHistory = () => {
 }
 
 .card-header {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.review-page :deep(.el-card) {
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.review-page :deep(.el-card:hover) {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.review-page :deep(.el-card__header) {
+  background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 20px 24px;
+}
+
+.review-page :deep(.el-card__body) {
+  padding: 28px;
+}
+
+.review-page :deep(.el-form-item__label) {
+  font-weight: 600;
+  color: #334155;
+  font-size: 14px;
+}
+
+.review-page :deep(.el-input__wrapper),
+.review-page :deep(.el-textarea__inner) {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+}
+
+.review-page :deep(.el-input__wrapper:hover),
+.review-page :deep(.el-textarea__inner:hover) {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.review-page :deep(.el-input__wrapper.is-focus),
+.review-page :deep(.el-textarea__inner:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+.review-page :deep(.el-select .el-input__wrapper) {
+  border-radius: 10px;
+}
+
+.review-page :deep(.el-radio-group) {
+  display: flex;
+  gap: 16px;
+}
+
+.review-page :deep(.el-radio) {
+  margin-right: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.review-page :deep(.el-radio:hover) {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.review-page :deep(.el-radio.is-checked) {
+  border-color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.review-page :deep(.el-button) {
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.review-page :deep(.el-button--primary) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+}
+
+.review-page :deep(.el-button--primary:hover) {
+  background: linear-gradient(135deg, #7e8fef 0%, #8658b5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.review-page :deep(.el-button--default) {
+  border: 2px solid #e2e8f0;
+  background: white;
+}
+
+.review-page :deep(.el-button--default:hover) {
+  border-color: #667eea;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
 }
 
 .review-result {
-  padding: 20px 0;
+  padding: 24px 0;
 }
 
 .result-summary {
-  margin: 20px 0;
+  margin: 24px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
 }
 
 .result-summary h3 {
-  margin-bottom: 10px;
-  font-size: 16px;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
 }
 
 .result-summary p {
-  line-height: 1.6;
-  color: #666;
+  line-height: 1.8;
+  color: #4a5568;
+  font-size: 15px;
 }
 
 .issues-section {
-  margin-top: 30px;
+  margin-top: 32px;
 }
 
 .issues-section h3 {
-  margin-bottom: 15px;
-  font-size: 16px;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
 }
 
 .issue-item {
-  padding: 15px;
-  margin-bottom: 15px;
-  border-left: 3px solid #409eff;
-  background: #f5f7fa;
-  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border-left: 4px solid #4a90e2;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.issue-item:hover {
+  transform: translateX(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .issue-item.high {
-  border-left-color: #f56c6c;
-  background: #fef0f0;
+  border-left-color: #f5576c;
+  background: linear-gradient(90deg, rgba(245, 87, 108, 0.03) 0%, white 100%);
 }
 
 .issue-item.medium {
-  border-left-color: #e6a23c;
-  background: #fdf6ec;
+  border-left-color: #ffd93d;
+  background: linear-gradient(90deg, rgba(255, 217, 61, 0.03) 0%, white 100%);
 }
 
 .issue-item.low {
-  border-left-color: #67c23a;
-  background: #f0f9ff;
+  border-left-color: #4facfe;
+  background: linear-gradient(90deg, rgba(79, 172, 254, 0.03) 0%, white 100%);
 }
 
 .issue-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .issue-type {
-  font-weight: 500;
-  color: #333;
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 15px;
 }
 
 .issue-description {
-  margin-bottom: 10px;
-  color: #666;
-  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #4a5568;
+  line-height: 1.7;
+  font-size: 14px;
 }
 
 .issue-suggestion {
-  color: #409eff;
-  line-height: 1.6;
+  color: #667eea;
+  line-height: 1.7;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.review-page :deep(.el-dialog) {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.review-page :deep(.el-dialog__header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px 24px;
+}
+
+.review-page :deep(.el-dialog__title) {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.review-page :deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: white;
+  font-size: 20px;
+}
+
+.review-page :deep(.el-descriptions) {
+  border-radius: 12px;
+  overflow: hidden;
 }
 </style>
