@@ -46,14 +46,19 @@ public interface ReviewService {
      */
     void executeAsyncReview(Long taskId);
 
-    /**
-     * 获取审查任务详情
-     */
-    ReviewTask getTaskDetail(Long taskId);
-
-    /**
-     * 获取用户的审查任务列表
-     */
+    /**
+     * 获取审查任务详情
+     */
+    ReviewTask getTaskDetail(Long taskId);
+
+    /**
+     * 获取审查任务详情（带用户验证）
+     */
+    ReviewTask getTaskDetail(Long taskId, Long userId);
+
+    /**
+     * 获取用户的审查任务列表
+     */
     PageResponseDTO<ReviewTask> getUserTasks(Long userId, ReviewTaskQueryDTO queryDTO);
 
     /**

@@ -111,9 +111,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void logout(String token) {
+    public void logout(String userId) {
         try {
-            String userId = JwtUtils.getUserId(token);
             String redisKey = RedisConstants.USER_TOKEN_KEY + userId;
             redisUtils.delete(redisKey);
             log.info("用户登出成功: userId={}", userId);

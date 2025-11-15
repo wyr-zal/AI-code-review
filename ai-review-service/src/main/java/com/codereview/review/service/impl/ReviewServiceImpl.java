@@ -8,10 +8,7 @@ import com.codereview.common.constant.RedisConstants;
 import com.codereview.common.enums.ReviewStatusEnum;
 import com.codereview.common.exception.BusinessException;
 import com.codereview.common.utils.RedisUtils;
-import com.codereview.review.dto.BatchReviewRequestDTO;
-import com.codereview.review.dto.CodeReviewRequestDTO;
-import com.codereview.review.dto.PageResponseDTO;
-import com.codereview.review.dto.ReviewTaskQueryDTO;
+import com.codereview.review.dto.*;
 import com.codereview.review.entity.ReviewTask;
 import com.codereview.review.mapper.ReviewTaskMapper;
 import com.codereview.review.service.ReviewService;
@@ -50,6 +47,7 @@ public class ReviewServiceImpl implements ReviewService {
     private RedisUtils redisUtils;
 
     private static final String REVIEW_QUEUE = "code.review.queue";
+
 
     @Override
     public Long submitReviewTask(CodeReviewRequestDTO dto, Long userId) {
@@ -252,6 +250,19 @@ public class ReviewServiceImpl implements ReviewService {
         ReviewTask task = reviewTaskMapper.selectById(taskId);
         if (task == null) {
             throw new BusinessException("审查任务不存在");
+        }
+        return task;
+    }
+
+    @Override
+    public ReviewTask getTaskDetail(Long taskId, Long userId) {
+        ReviewTask task = reviewTaskMapper.selectById(taskId);
+        if (task == null) {
+            throw new BusinessException("审查任务不存在");
+        }
+        // 验证任务是否属于当前用户
+        if (!task.getUserId().equals(userId)) {
+            throw new BusinessException("无权访问该任务");
         }
         return task;
     }

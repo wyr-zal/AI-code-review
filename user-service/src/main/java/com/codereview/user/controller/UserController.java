@@ -1,7 +1,7 @@
 package com.codereview.user.controller;
 
 import com.codereview.common.result.Result;
-import com.codereview.common.utils.JwtUtils;
+import com.codereview.common.utils.UserContextHolder;
 import com.codereview.user.dto.UserLoginDTO;
 import com.codereview.user.dto.UserRegisterDTO;
 import com.codereview.user.service.UserService;
@@ -55,9 +55,14 @@ public class UserController {
      */
     @Operation(summary = "用户登出", description = "用户退出登录，清除token缓存")
     @PostMapping("/logout")
-    public Result<String> logout(
-            @Parameter(description = "用户认证token", required = true) @RequestHeader("Authorization") String token) {
-        userService.logout(token);
+    public Result<String> logout(@RequestHeader(value = "X-Original-Token", required = false) String originalToken) {
+        // 从UserContext获取用户信息
+        String userId = UserContextHolder.getCurrentUserId();
+        if (userId == null) {
+            return Result.error(401, "用户未登录");
+        }
+        // 使用从UserContext获取的userId，而不是解析原始token
+        userService.logout(userId);
         return Result.success("登出成功", "登出成功");
     }
 
@@ -66,9 +71,11 @@ public class UserController {
      */
     @Operation(summary = "获取用户信息", description = "根据token获取当前登录用户的详细信息")
     @GetMapping("/info")
-    public Result<Map<String, Object>> getUserInfo(
-            @Parameter(description = "用户认证token", required = true) @RequestHeader("Authorization") String token) {
-        String userId = JwtUtils.getUserId(token);
+    public Result<Map<String, Object>> getUserInfo() {
+        String userId = UserContextHolder.getCurrentUserId();
+        if (userId == null) {
+            return Result.error(401, "用户未登录");
+        }
         Map<String, Object> userInfo = userService.getUserInfo(Long.parseLong(userId));
         return Result.success(userInfo);
     }

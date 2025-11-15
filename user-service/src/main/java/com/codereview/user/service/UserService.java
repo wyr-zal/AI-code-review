@@ -24,7 +24,7 @@ public interface UserService {
     /**
      * 用户登出
      */
-    void logout(String token);
+    void logout(String userId);
 
     /**
      * 获取用户信息
