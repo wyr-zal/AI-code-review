@@ -2,9 +2,7 @@ package com.codereview.review.controller;
 
 import com.codereview.common.result.Result;
 import com.codereview.common.utils.JwtUtils;
-import com.codereview.review.dto.CodeReviewRequestDTO;
-import com.codereview.review.dto.PageResponseDTO;
-import com.codereview.review.dto.ReviewTaskQueryDTO;
+import com.codereview.review.dto.*;
 import com.codereview.review.entity.ReviewTask;
 import com.codereview.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +10,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * 代码审查控制器
@@ -40,6 +40,19 @@ public class ReviewController {
         String userId = JwtUtils.getUserId(token);
         Long taskId = reviewService.submitReviewTask(dto, Long.parseLong(userId));
         return Result.success("任务提交成功", taskId);
+    }
+
+    /**
+     * 批量提交代码审查任务
+     */
+    @Operation(summary = "批量提交代码审查任务", description = "批量提交多个文件进行代码审查")
+    @PostMapping(value = "/batch", consumes = "multipart/form-data")
+    public Result<List<Long>> submitBatchReview(
+            BatchReviewMultipartDTO dto,
+            @Parameter(description = "用户认证token", required = true) @RequestHeader("Authorization") String token) {
+        String userId = JwtUtils.getUserId(token);
+        List<Long> taskIds = reviewService.submitBatchReviewTask(dto.getTitle(), dto.getLanguage(), dto.getAiModel(), dto.getAsync(), dto.getFiles(), Long.parseLong(userId));
+        return Result.success("批量任务提交成功", taskIds);
     }
 
     /**

@@ -9,6 +9,18 @@ export function submitReview(data) {
   })
 }
 
+// 批量提交代码审查
+export function submitBatchReview(data) {
+  return request({
+    url: '/api/review/batch',
+    method: 'post',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
 // 同步代码审查
 export function syncReview(data) {
   return request({

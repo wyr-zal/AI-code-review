@@ -1,9 +1,14 @@
 package com.codereview.review.service;
 
+import com.codereview.review.dto.BatchReviewMultipartDTO;
+import com.codereview.review.dto.BatchReviewRequestDTO;
 import com.codereview.review.dto.CodeReviewRequestDTO;
 import com.codereview.review.dto.PageResponseDTO;
 import com.codereview.review.dto.ReviewTaskQueryDTO;
 import com.codereview.review.entity.ReviewTask;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * 代码审查服务接口
@@ -15,6 +20,21 @@ public interface ReviewService {
      * 提交代码审查任务
      */
     Long submitReviewTask(CodeReviewRequestDTO dto, Long userId);
+
+    /**
+     * 批量提交代码审查任务
+     */
+    List<Long> submitBatchReviewTask(BatchReviewRequestDTO dto, Long userId);
+
+    /**
+     * 批量提交代码审查任务（用于multipart表单）
+     */
+    List<Long> submitBatchReviewTask(String title, String language, String aiModel, Boolean async, List<MultipartFile> files, Long userId);
+
+    /**
+     * 批量提交代码审查任务（使用Multipart DTO）
+     */
+    List<Long> submitBatchReviewTask(BatchReviewMultipartDTO dto, Long userId);
 
     /**
      * 执行同步代码审查

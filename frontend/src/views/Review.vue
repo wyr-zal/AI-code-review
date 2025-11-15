@@ -7,12 +7,15 @@
         </div>
       </template>
 
-      <el-form
-        ref="reviewFormRef"
-        :model="reviewForm"
-        :rules="reviewRules"
-        label-width="100px"
-      >
+      <el-tabs v-model="activeTab" class="review-tabs">
+        <!-- 单文件审查 -->
+        <el-tab-pane label="单文件审查" name="single">
+          <el-form
+            ref="reviewFormRef"
+            :model="reviewForm"
+            :rules="reviewRules"
+            label-width="100px"
+          >
         <el-form-item label="标题" prop="title">
           <el-input
             v-model="reviewForm.title"
@@ -77,8 +80,95 @@
             提交审查
           </el-button>
           <el-button @click="handleReset">重置</el-button>
-        </el-form-item>
-      </el-form>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+
+        <!-- 批量文件审查 -->
+        <el-tab-pane label="批量文件审查" name="batch">
+          <el-form
+            ref="batchFormRef"
+            :model="batchForm"
+            :rules="batchRules"
+            label-width="100px"
+          >
+            <el-form-item label="标题前缀" prop="title">
+              <el-input
+                v-model="batchForm.title"
+                placeholder="请输入批量任务标题前缀"
+                clearable
+              />
+            </el-form-item>
+
+            <el-form-item label="编程语言" prop="language">
+              <el-select
+                v-model="batchForm.language"
+                placeholder="请选择编程语言"
+                style="width: 200px"
+              >
+                <el-option label="Java" value="Java" />
+                <el-option label="Python" value="Python" />
+                <el-option label="JavaScript" value="JavaScript" />
+                <el-option label="TypeScript" value="TypeScript" />
+                <el-option label="C++" value="C++" />
+                <el-option label="Go" value="Go" />
+                <el-option label="Rust" value="Rust" />
+                <el-option label="其他" value="Other" />
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="AI模型" prop="aiModel">
+              <el-select
+                v-model="batchForm.aiModel"
+                placeholder="请选择AI模型"
+                style="width: 200px"
+              >
+                <el-option label="Qwen3-Coder (代码专用)" value="Qwen3-Coder" />
+                <el-option label="TBStars2-200B" value="TBStars2-200B-A13B" />
+                <el-option label="GPT-3.5 Turbo" value="gpt-3.5-turbo" />
+                <el-option label="GPT-4" value="gpt-4" />
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="审查模式" prop="async">
+              <el-radio-group v-model="batchForm.async">
+                <el-radio :label="true">异步审查（推荐）</el-radio>
+                <el-radio :label="false">同步审查</el-radio>
+              </el-radio-group>
+              <div style="margin-top: 8px; color: #999; font-size: 12px;">
+                异步审查：提交后在后台处理，可在历史记录中查看结果<br/>
+                同步审查：立即返回结果，耗时较长
+              </div>
+            </el-form-item>
+
+            <el-form-item label="上传文件" prop="files">
+              <el-upload
+                ref="uploadRef"
+                v-model:file-list="batchForm.files"
+                class="upload-demo"
+                multiple
+                :auto-upload="false"
+                :limit="10"
+                :on-exceed="handleExceed"
+              >
+                <el-button type="primary">选择文件</el-button>
+                <template #tip>
+                  <div class="el-upload__tip">
+                    请选择要审查的代码文件，最多可同时上传10个文件
+                  </div>
+                </template>
+              </el-upload>
+            </el-form-item>
+
+            <el-form-item>
+              <el-button type="primary" :loading="loading" @click="handleBatchSubmit">
+                批量提交审查
+              </el-button>
+              <el-button @click="handleBatchReset">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
     </el-card>
 
     <!-- 同步审查结果对话框 -->
@@ -141,7 +231,7 @@
 <script setup>
 import { ref, reactive, onActivated, onDeactivated, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { submitReview, syncReview } from '@/api/review'
+import { submitReview, syncReview, submitBatchReview } from '@/api/review'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 // 定义组件名称，供 keep-alive 使用
@@ -152,9 +242,12 @@ defineOptions({
 const router = useRouter()
 
 const reviewFormRef = ref(null)
+const batchFormRef = ref(null)
+const uploadRef = ref(null)
 const loading = ref(false)
 const resultDialogVisible = ref(false)
 const reviewResult = ref(null)
+const activeTab = ref('single')
 
 const reviewForm = reactive({
   title: '',
@@ -162,6 +255,14 @@ const reviewForm = reactive({
   language: 'Java',
   aiModel: 'Qwen3-Coder',
   async: true
+})
+
+const batchForm = reactive({
+  title: '',
+  language: 'Java',
+  aiModel: 'Qwen3-Coder',
+  async: true,
+  files: []
 })
 
 // 生命周期钩子 - 调试用
@@ -195,6 +296,22 @@ const reviewRules = {
   codeContent: [
     { required: true, message: '请输入代码内容', trigger: 'blur' },
     { min: 10, message: '代码内容至少10个字符', trigger: 'blur' }
+  ]
+}
+
+const batchRules = {
+  title: [
+    { required: true, message: '请输入标题前缀', trigger: 'blur' },
+    { min: 3, max: 200, message: '标题长度为3-200个字符', trigger: 'blur' }
+  ],
+  language: [
+    { required: true, message: '请选择编程语言', trigger: 'change' }
+  ],
+  aiModel: [
+    { required: true, message: '请选择AI模型', trigger: 'change' }
+  ],
+  files: [
+    { required: true, message: '请至少选择一个文件', trigger: 'change' }
   ]
 }
 
@@ -247,6 +364,55 @@ const handleSubmit = async () => {
 
 const handleReset = () => {
   reviewFormRef.value?.resetFields()
+}
+
+const handleBatchReset = () => {
+  batchFormRef.value?.resetFields()
+  batchForm.files = []
+  uploadRef.value?.clearFiles()
+}
+
+const handleExceed = () => {
+  ElMessage.warning('最多只能上传10个文件')
+}
+
+const handleBatchSubmit = async () => {
+  if (!batchFormRef.value) return
+
+  await batchFormRef.value.validate(async (valid) => {
+    if (valid) {
+      if (batchForm.files.length === 0) {
+        ElMessage.error('请至少选择一个文件')
+        return
+      }
+
+      loading.value = true
+      try {
+        // 构造 FormData 对象
+        const formData = new FormData()
+        formData.append('title', batchForm.title)
+        formData.append('language', batchForm.language)
+        formData.append('aiModel', batchForm.aiModel)
+        formData.append('async', batchForm.async)
+        
+        // 添加文件
+        batchForm.files.forEach(file => {
+          formData.append('files', file.raw)
+        })
+
+        const res = await submitBatchReview(formData)
+        ElMessage.success(`批量任务提交成功，共提交${res.data.length}个任务，请在审查历史中查看结果`)
+        setTimeout(() => {
+          router.push('/dashboard/history')
+        }, 1500)
+      } catch (error) {
+        console.error('批量提交失败:', error)
+        ElMessage.error('批量提交失败，请查看控制台日志')
+      } finally {
+        loading.value = false
+      }
+    }
+  })
 }
 
 const getScoreType = (score) => {

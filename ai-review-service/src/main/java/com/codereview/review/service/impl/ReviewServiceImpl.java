@@ -8,6 +8,7 @@ import com.codereview.common.constant.RedisConstants;
 import com.codereview.common.enums.ReviewStatusEnum;
 import com.codereview.common.exception.BusinessException;
 import com.codereview.common.utils.RedisUtils;
+import com.codereview.review.dto.BatchReviewRequestDTO;
 import com.codereview.review.dto.CodeReviewRequestDTO;
 import com.codereview.review.dto.PageResponseDTO;
 import com.codereview.review.dto.ReviewTaskQueryDTO;
@@ -19,8 +20,11 @@ import com.codereview.review.strategy.AIClientStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +78,141 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         return task.getId();
+    }
+
+    @Override
+    public List<Long> submitBatchReviewTask(BatchReviewRequestDTO dto, Long userId) {
+        List<Long> taskIds = new ArrayList<>();
+        
+        try {
+            for (MultipartFile file : dto.getFiles()) {
+                // 从文件名获取标题
+                String title = dto.getTitle() + " - " + file.getOriginalFilename();
+                
+                // 读取文件内容
+                String codeContent = new String(file.getBytes());
+                
+                // 创建审查任务
+                ReviewTask task = new ReviewTask();
+                task.setUserId(userId);
+                task.setTitle(title);
+                task.setCodeContent(codeContent);
+                task.setLanguage(dto.getLanguage());
+                task.setAiModel(dto.getAiModel());
+                task.setStatus(ReviewStatusEnum.PENDING.getCode());
+
+                reviewTaskMapper.insert(task);
+                taskIds.add(task.getId());
+                log.info("创建批量代码审查任务: taskId={}, userId={}, fileName={}", task.getId(), userId, file.getOriginalFilename());
+
+                // 如果是异步审查，发送到消息队列
+                if (dto.getAsync()) {
+                    JSONObject message = new JSONObject();
+                    message.put("taskId", task.getId());
+                    message.put("userId", userId);
+                    rabbitTemplate.convertAndSend(REVIEW_QUEUE, message.toJSONString());
+                    log.info("批量任务已发送到消息队列: taskId={}", task.getId());
+                } else {
+                    // 同步执行审查
+                    executeReview(task);
+                }
+            }
+        } catch (IOException e) {
+            log.error("读取上传文件失败", e);
+            throw new BusinessException("文件读取失败: " + e.getMessage());
+        }
+
+        return taskIds;
+    }
+
+    @Override
+    public List<Long> submitBatchReviewTask(String title, String language, String aiModel, Boolean async, List<MultipartFile> files, Long userId) {
+        List<Long> taskIds = new ArrayList<>();
+        
+        try {
+            for (MultipartFile file : files) {
+                // 从文件名获取标题
+                String taskTitle = title + " - " + file.getOriginalFilename();
+                
+                // 读取文件内容
+                String codeContent = new String(file.getBytes());
+                
+                // 创建审查任务
+                ReviewTask task = new ReviewTask();
+                task.setUserId(userId);
+                task.setTitle(taskTitle);
+                task.setCodeContent(codeContent);
+                task.setLanguage(language);
+                task.setAiModel(aiModel);
+                task.setStatus(ReviewStatusEnum.PENDING.getCode());
+
+                reviewTaskMapper.insert(task);
+                taskIds.add(task.getId());
+                log.info("创建批量代码审查任务: taskId={}, userId={}, fileName={}", task.getId(), userId, file.getOriginalFilename());
+
+                // 如果是异步审查，发送到消息队列
+                if (async) {
+                    JSONObject message = new JSONObject();
+                    message.put("taskId", task.getId());
+                    message.put("userId", userId);
+                    rabbitTemplate.convertAndSend(REVIEW_QUEUE, message.toJSONString());
+                    log.info("批量任务已发送到消息队列: taskId={}", task.getId());
+                } else {
+                    // 同步执行审查
+                    executeReview(task);
+                }
+            }
+        } catch (IOException e) {
+            log.error("读取上传文件失败", e);
+            throw new BusinessException("文件读取失败: " + e.getMessage());
+        }
+
+        return taskIds;
+    }
+
+    @Override
+    public List<Long> submitBatchReviewTask(BatchReviewMultipartDTO dto, Long userId) {
+        List<Long> taskIds = new ArrayList<>();
+        
+        try {
+            for (MultipartFile file : dto.getFiles()) {
+                // 从文件名获取标题
+                String title = dto.getTitle() + " - " + file.getOriginalFilename();
+                
+                // 读取文件内容
+                String codeContent = new String(file.getBytes());
+                
+                // 创建审查任务
+                ReviewTask task = new ReviewTask();
+                task.setUserId(userId);
+                task.setTitle(title);
+                task.setCodeContent(codeContent);
+                task.setLanguage(dto.getLanguage());
+                task.setAiModel(dto.getAiModel());
+                task.setStatus(ReviewStatusEnum.PENDING.getCode());
+
+                reviewTaskMapper.insert(task);
+                taskIds.add(task.getId());
+                log.info("创建批量代码审查任务: taskId={}, userId={}, fileName={}", task.getId(), userId, file.getOriginalFilename());
+
+                // 如果是异步审查，发送到消息队列
+                if (dto.getAsync()) {
+                    JSONObject message = new JSONObject();
+                    message.put("taskId", task.getId());
+                    message.put("userId", userId);
+                    rabbitTemplate.convertAndSend(REVIEW_QUEUE, message.toJSONString());
+                    log.info("批量任务已发送到消息队列: taskId={}", task.getId());
+                } else {
+                    // 同步执行审查
+                    executeReview(task);
+                }
+            }
+        } catch (IOException e) {
+            log.error("读取上传文件失败", e);
+            throw new BusinessException("文件读取失败: " + e.getMessage());
+        }
+
+        return taskIds;
     }
 
     @Override

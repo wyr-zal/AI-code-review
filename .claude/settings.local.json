@@ -4,7 +4,10 @@
       "Bash(echo:*)",
       "Bash(\"E:\\project\\AI-project\\ai-code-review-platform\\frontend\\.env\")",
       "Bash(\"E:\\project\\AI-project\\ai-code-review-platform\\frontend\\.env.production\")",
-      "Bash(\"E:\\project\\AI-project\\ai-code-review-platform\\frontend\\.gitignore\")"
+      "Bash(\"E:\\project\\AI-project\\ai-code-review-platform\\frontend\\.gitignore\")",
+      "Bash(dir /s /b *.java 2)",
+      "Bash(nul)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
