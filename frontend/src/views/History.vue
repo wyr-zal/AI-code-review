@@ -4,10 +4,16 @@
       <template #header>
         <div class="card-header">
           <span>审查历史</span>
-          <el-button type="primary" size="small" @click="refreshList">
-            <el-icon><Refresh /></el-icon>
-            刷新
-          </el-button>
+          <div>
+            <el-button type="primary" size="small" @click="refreshList">
+              <el-icon><Refresh /></el-icon>
+              刷新
+            </el-button>
+            <el-button type="success" size="small" @click="handleExport" :disabled="selectedTasks.length === 0">
+              <el-icon><Download /></el-icon>
+              批量导出
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -49,7 +55,9 @@
         :data="taskList"
         stripe
         style="width: 100%; margin-top: 20px"
+        @selection-change="handleSelectionChange"
       >
+        <el-table-column type="selection" width="55" />
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip />
         <el-table-column prop="language" label="语言" width="100" />
@@ -139,8 +147,9 @@
 <script setup>
 import { ref, reactive, onActivated, onDeactivated, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getReviewTasks, deleteReviewTask } from '@/api/review'
+import { getReviewTasks, deleteReviewTask, exportReviewReport } from '@/api/review'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Refresh, Download } from '@element-plus/icons-vue'
 
 // 定义组件名称，供 keep-alive 使用
 defineOptions({
@@ -233,6 +242,79 @@ const handleDelete = (id) => {
       console.error('删除失败:', error)
     }
   }).catch(() => {})
+}
+
+// 批量选择相关
+const selectedTasks = ref([])
+
+const handleSelectionChange = (selection) => {
+  selectedTasks.value = selection
+}
+
+const handleExport = () => {
+  if (selectedTasks.value.length === 0) {
+    ElMessage.warning('请先选择要导出的任务')
+    return
+  }
+  
+  // 显示导出选项对话框
+  ElMessageBox.prompt('请输入导出文件名（可选）', '导出报告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputValue: 'review_report'
+  }).then(({ value }) => {
+    // 获取选中的任务ID
+    const taskIds = selectedTasks.value.map(task => task.id)
+    
+    // 显示格式选择对话框
+    ElMessageBox.confirm(
+      '请选择导出格式', 
+      '导出格式', 
+      {
+        distinguishCancelAndClose: true,
+        confirmButtonText: 'PDF',
+        cancelButtonText: 'Excel'
+      }
+    ).then(() => {
+      // 导出为PDF
+      exportReport(taskIds, 'pdf', value || 'review_report')
+    }).catch((action) => {
+      if (action === 'cancel') {
+        // 导出为Excel
+        exportReport(taskIds, 'excel', value || 'review_report')
+      }
+    })
+  }).catch(() => {
+    // 用户取消输入文件名
+  })
+}
+
+const exportReport = async (taskIds, format, fileName) => {
+  try {
+    const response = await exportReviewReport({
+      taskIds: taskIds,
+      format: format,
+      includeDetails: true,
+      fileName: fileName
+    })
+    
+    // 创建下载链接
+    const url = window.URL.createObjectURL(new Blob([response]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `${fileName}.${format}`)
+    document.body.appendChild(link)
+    link.click()
+    
+    // 清理
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('导出成功')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('导出失败，请查看控制台日志')
+  }
 }
 
 const getStatusType = (status) => {

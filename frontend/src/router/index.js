@@ -91,41 +91,61 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-/**
- * 检查JWT是否过期
- * @param {string} token - JWT token
- * @returns {boolean} true表示已过期，false表示未过期
- */
-function isTokenExpired(token) {
-  if (!token) return true
-
-  try {
-    // JWT格式：header.payload.signature
-    const parts = token.split('.')
-    if (parts.length !== 3) {
-      return true
-    }
-
-    // 解码payload部分
-    const payload = JSON.parse(atob(parts[1]))
-
-    // 检查是否有exp字段
-    if (!payload.exp) {
-      // 如果没有过期时间，认为token有效
-      return false
-    }
-
-    // exp是秒级时间戳，需要转换为毫秒
-    const expTime = payload.exp * 1000
-    const currentTime = Date.now()
-
-    // 如果当前时间超过过期时间，返回true
-    return currentTime >= expTime
-  } catch (error) {
-    console.error('Token解析失败:', error)
-    // 解析失败认为token无效
-    return true
-  }
+/**
+ * Base64Url解码函数
+ * @param {string} str - Base64Url编码的字符串
+ * @returns {string} 解码后的字符串
+ */
+function base64UrlDecode(str) {
+  // 将Base64Url编码转换为标准Base64编码
+  let base64 = str.replace(/-/g, '+').replace(/_/g, '/')
+  // 补充等号
+  switch (base64.length % 4) {
+    case 2:
+      base64 += '=='
+      break
+    case 3:
+      base64 += '='
+      break
+  }
+  return atob(base64)
+}
+
+/**
+ * 检查JWT是否过期
+ * @param {string} token - JWT token
+ * @returns {boolean} true表示已过期，false表示未过期
+ */
+function isTokenExpired(token) {
+  if (!token) return true
+
+  try {
+    // JWT格式：header.payload.signature
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      return true
+    }
+
+    // 使用Base64Url解码payload部分
+    const payload = JSON.parse(base64UrlDecode(parts[1]))
+
+    // 检查是否有exp字段
+    if (!payload.exp) {
+      // 如果没有过期时间，认为token有效
+      return false
+    }
+
+    // exp是秒级时间戳，需要转换为毫秒
+    const expTime = payload.exp * 1000
+    const currentTime = Date.now()
+
+    // 如果当前时间超过过期时间，返回true
+    return currentTime >= expTime
+  } catch (error) {
+    console.error('Token解析失败:', error)
+    // 解析失败认为token无效
+    return true
+  }
 }
 
 export default router

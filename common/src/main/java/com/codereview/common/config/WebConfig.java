@@ -1,4 +1,4 @@
-package com.codereview.user.config;
+package com.codereview.common.config;
 
 import com.codereview.common.interceptor.UserContextInterceptor;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +15,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册用户上下文拦截器，拦截所有API请求
+        // 修改路径模式以匹配实际API路径，之前只匹配/api/**，现在匹配更广泛的路径
         registry.addInterceptor(new UserContextInterceptor())
-                .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/user/login", "/api/user/register"); // 排除登录和注册接口
+                .addPathPatterns("/**")
+                .excludePathPatterns("/api/user/login", "/api/user/register", "/user/login", "/user/register");
     }
 }

@@ -1,13 +1,10 @@
 package com.codereview.review.service;
 
-import com.codereview.review.dto.BatchReviewMultipartDTO;
-import com.codereview.review.dto.BatchReviewRequestDTO;
-import com.codereview.review.dto.CodeReviewRequestDTO;
-import com.codereview.review.dto.PageResponseDTO;
-import com.codereview.review.dto.ReviewTaskQueryDTO;
+import com.codereview.review.dto.*;
 import com.codereview.review.entity.ReviewTask;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -61,8 +58,18 @@ public interface ReviewService {
      */
     PageResponseDTO<ReviewTask> getUserTasks(Long userId, ReviewTaskQueryDTO queryDTO);
 
-    /**
-     * 删除审查任务
-     */
-    void deleteTask(Long taskId, Long userId);
+    /**
+     * 删除审查任务
+     */
+    void deleteTask(Long taskId, Long userId);
+
+    /**
+     * 导出审查报告
+     */
+    void exportReviewReport(List<Long> taskIds, String format, Boolean includeDetails, Long userId, HttpServletResponse response);
+    
+    /**
+     * 导出审查报告（带自定义文件名）
+     */
+    void exportReviewReport(List<Long> taskIds, String format, Boolean includeDetails, String fileName, Long userId, HttpServletResponse response);
 }

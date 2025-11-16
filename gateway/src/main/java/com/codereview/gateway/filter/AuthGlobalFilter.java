@@ -36,9 +36,13 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+        log.debug("认证过滤器 - 请求路径: {}, Authorization头: {}", path, authHeader);
 
         // 检查是否需要跳过认证
         if (isExcludePath(path)) {
+            log.debug("跳过认证: {}", path);
             return chain.filter(exchange);
         }
 
@@ -57,14 +61,18 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             String nickname = (String) claims.get("nickname");
             String email = (String) claims.get("email");
 
+            log.debug("JWT验证成功 - userId: {}, username: {}, path: {}", userId, username, path);
+
             // 将用户信息添加到请求头传递给下游服务
+            // 重要：确保请求头能够正确传递到下游服务
+
             ServerHttpRequest.Builder builder = exchange.getRequest().mutate();
-            builder.header("X-User-Id", userId);
-            builder.header("X-Username", username);
-            builder.header("X-Nickname", nickname);
-            builder.header("X-Email", email);
+            builder.header("X-User-Id", userId != null ? userId : "");
+            builder.header("X-Username", username != null ? username : "");
+            builder.header("X-Nickname", nickname != null ? nickname : "");
+            builder.header("X-Email", email != null ? email : "");
             // 传递原始token，用于登出等操作
-            builder.header("X-Original-Token", token);
+            builder.header("X-Original-Token", token != null ? token : "");
 
             log.info("用户认证成功: userId={}, username={}, path={}", userId, username, path);
 
@@ -79,7 +87,17 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
      * 检查路径是否需要排除认证
      */
     private boolean isExcludePath(String path) {
-        return EXCLUDE_PATHS.stream().anyMatch(p -> path.startsWith(p.replace("**", "")));
+        for (String excludePath : EXCLUDE_PATHS) {
+            if (excludePath.endsWith("/**")) {
+                String prefix = excludePath.substring(0, excludePath.length() - 3); // 移除 /**
+                if (path.startsWith(prefix)) {
+                    return true;
+                }
+            } else if (path.equals(excludePath)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

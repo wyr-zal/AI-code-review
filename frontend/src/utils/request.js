@@ -17,7 +17,7 @@ request.interceptors.request.use(
     // 从localStorage获取token
     const token = localStorage.getItem('token')
     if (token) {
-      config.headers['Authorization'] = token
+      config.headers['Authorization'] = 'Bearer ' + token
     }
     return config
   },
@@ -36,6 +36,14 @@ request.interceptors.response.use(
     if (res.code === 200) {
       return res
     } else {
+      // 检查是否是401未授权错误
+      if (res.code === 401) {
+        ElMessage.error('登录已过期，请重新登录')
+        localStorage.removeItem('token')
+        localStorage.removeItem('userInfo')
+        router.push('/login')
+        return Promise.reject(new Error(res.message || '未授权'))
+      }
       // 其他错误码，显示错误信息
       ElMessage.error(res.message || '请求失败')
       return Promise.reject(new Error(res.message || '请求失败'))

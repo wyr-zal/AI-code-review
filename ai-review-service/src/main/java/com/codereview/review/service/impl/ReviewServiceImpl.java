@@ -14,12 +14,20 @@ import com.codereview.review.mapper.ReviewTaskMapper;
 import com.codereview.review.service.ReviewService;
 import com.codereview.review.strategy.AIClientFactory;
 import com.codereview.review.strategy.AIClientStrategy;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfWriter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -309,6 +317,165 @@ public class ReviewServiceImpl implements ReviewService {
 
         reviewTaskMapper.deleteById(taskId);
         log.info("删除审查任务: taskId={}, userId={}", taskId, userId);
+    }
+
+    @Override
+    public void exportReviewReport(List<Long> taskIds, String format, Boolean includeDetails, Long userId, HttpServletResponse response) {
+        exportReviewReport(taskIds, format, includeDetails, null, userId, response);
+    }
+    
+    @Override
+    public void exportReviewReport(List<Long> taskIds, String format, Boolean includeDetails, String fileName, Long userId, HttpServletResponse response) {
+        // 验证任务ID列表
+        if (taskIds == null || taskIds.isEmpty()) {
+            throw new BusinessException("任务ID列表不能为空");
+        }
+
+        // 查询任务详情
+        List<ReviewTask> tasks = new ArrayList<>();
+        for (Long taskId : taskIds) {
+            ReviewTask task = reviewTaskMapper.selectById(taskId);
+            if (task == null) {
+                throw new BusinessException("任务不存在: " + taskId);
+            }
+            // 验证任务是否属于当前用户
+            if (!task.getUserId().equals(userId)) {
+                throw new BusinessException("无权访问任务: " + taskId);
+            }
+            tasks.add(task);
+        }
+
+        try {
+            // 设置默认文件名
+            String actualFileName = (fileName != null && !fileName.isEmpty()) ? fileName : "review_report";
+            
+            if ("excel".equalsIgnoreCase(format)) {
+                exportToExcel(tasks, includeDetails, actualFileName, response);
+            } else {
+                exportToPdf(tasks, includeDetails, actualFileName, response);
+            }
+        } catch (Exception e) {
+            log.error("导出审查报告失败", e);
+            throw new BusinessException("导出报告失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 导出为Excel格式
+     */
+    private void exportToExcel(List<ReviewTask> tasks, Boolean includeDetails, String fileName, HttpServletResponse response) throws IOException {
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".xlsx");
+
+        // 使用POI创建Excel文件
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("代码审查报告");
+
+            // 创建表头
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"任务ID", "标题", "编程语言", "AI模型", "状态", "质量评分", "安全评分", "性能评分", "问题数量"};
+            if (includeDetails) {
+                headers = new String[]{"任务ID", "标题", "编程语言", "AI模型", "状态", "质量评分", "安全评分", "性能评分", "问题数量", "审查结果", "错误信息"};
+            }
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+            }
+
+            // 填充数据
+            int rowNum = 1;
+            for (ReviewTask task : tasks) {
+                Row row = sheet.createRow(rowNum++);
+                int cellNum = 0;
+                
+                row.createCell(cellNum++).setCellValue(task.getId());
+                row.createCell(cellNum++).setCellValue(task.getTitle());
+                row.createCell(cellNum++).setCellValue(task.getLanguage());
+                row.createCell(cellNum++).setCellValue(task.getAiModel());
+                row.createCell(cellNum++).setCellValue(getStatusText(task.getStatus()));
+                row.createCell(cellNum++).setCellValue(task.getQualityScore() != null ? task.getQualityScore() : 0);
+                row.createCell(cellNum++).setCellValue(task.getSecurityScore() != null ? task.getSecurityScore() : 0);
+                row.createCell(cellNum++).setCellValue(task.getPerformanceScore() != null ? task.getPerformanceScore() : 0);
+                row.createCell(cellNum++).setCellValue(task.getIssueCount() != null ? task.getIssueCount() : 0);
+                
+                if (includeDetails) {
+                    row.createCell(cellNum++).setCellValue(task.getReviewResult() != null ? task.getReviewResult() : "");
+                    row.createCell(cellNum++).setCellValue(task.getErrorMsg() != null ? task.getErrorMsg() : "");
+                }
+            }
+
+            // 自动调整列宽
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            workbook.write(response.getOutputStream());
+        }
+    }
+
+    /**
+     * 导出为PDF格式
+     */
+    private void exportToPdf(List<ReviewTask> tasks, Boolean includeDetails, String fileName, HttpServletResponse response) throws IOException {
+        // 设置响应头
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".pdf");
+
+        // 使用iText创建PDF文件
+        Document document = new Document();
+        try {
+            PdfWriter.getInstance(document, response.getOutputStream());
+            document.open();
+
+            // 添加标题
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
+            document.add(new Paragraph("代码审查报告", titleFont));
+            document.add(new Paragraph(" "));
+
+            // 添加任务详情
+            Font contentFont = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);
+            for (ReviewTask task : tasks) {
+                document.add(new Paragraph("任务ID: " + task.getId(), contentFont));
+                document.add(new Paragraph("标题: " + task.getTitle(), contentFont));
+                document.add(new Paragraph("编程语言: " + task.getLanguage(), contentFont));
+                document.add(new Paragraph("AI模型: " + task.getAiModel(), contentFont));
+                document.add(new Paragraph("状态: " + getStatusText(task.getStatus()), contentFont));
+                document.add(new Paragraph("质量评分: " + (task.getQualityScore() != null ? task.getQualityScore() : "N/A"), contentFont));
+                document.add(new Paragraph("安全评分: " + (task.getSecurityScore() != null ? task.getSecurityScore() : "N/A"), contentFont));
+                document.add(new Paragraph("性能评分: " + (task.getPerformanceScore() != null ? task.getPerformanceScore() : "N/A"), contentFont));
+                document.add(new Paragraph("问题数量: " + (task.getIssueCount() != null ? task.getIssueCount() : 0), contentFont));
+                
+                if (includeDetails && task.getReviewResult() != null) {
+                    document.add(new Paragraph("审查结果: " + task.getReviewResult(), contentFont));
+                }
+                
+                if (task.getErrorMsg() != null) {
+                    document.add(new Paragraph("错误信息: " + task.getErrorMsg(), contentFont));
+                }
+                
+                document.add(new Paragraph(" ", contentFont));
+            }
+        } catch (DocumentException e) {
+            throw new RuntimeException(e);
+        } finally {
+            document.close();
+        }
+    }
+
+    /**
+     * 获取状态文本
+     */
+    private String getStatusText(Integer status) {
+        if (status == null) return "未知";
+        switch (status) {
+            case 0: return "待审查";
+            case 1: return "审查中";
+            case 2: return "已完成";
+            case 3: return "审查失败";
+            default: return "未知";
+        }
     }
 
     /**
