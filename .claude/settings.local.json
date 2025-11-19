@@ -7,7 +7,14 @@
       "Bash(\"E:\\project\\AI-project\\ai-code-review-platform\\frontend\\.gitignore\")",
       "Bash(dir /s /b *.java 2)",
       "Bash(nul)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(test:*)",
+      "Bash(cp:*)",
+      "Bash(docker --version:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker logs:*)",
+      "Bash(mvn test:*)",
+      "Bash(mvn clean install:*)"
     ],
     "deny": [],
     "ask": []
