@@ -1,0 +1,88 @@
+# Prometheus configuration file
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Rule files
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+  - "prometheus-rules.yml"
+
+# Scrape configuration
+scrape_configs:
+  # Monitor Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+
+  # Monitor Gateway Service
+  - job_name: 'gateway-service'
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+
+  # Monitor User Service
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['host.docker.internal:8001']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+
+  # Monitor AI Review Service
+  - job_name: 'ai-review-service'
+    static_configs:
+      - targets: ['host.docker.internal:8002']
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+
+  # Monitor MySQL with mysqld_exporter
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['192.168.100.128:9104']
+    scrape_interval: 15s
+    scrape_timeout: 5s
+
+  # Monitor Redis with redis_exporter
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['192.168.100.128:9121']
+    scrape_interval: 15s
+    scrape_timeout: 5s
+
+  # Monitor RabbitMQ with rabbitmq_exporter
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['192.168.100.128:9419']
+    scrape_interval: 15s
+    scrape_timeout: 5s
+
+  # Monitor Nacos
+  - job_name: 'nacos'
+    static_configs:
+      - targets: ['192.168.100.128:8848']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    metrics_path: '/nacos/actuator/prometheus'
+
+  # Monitor Node Exporter
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+    scrape_timeout: 5s

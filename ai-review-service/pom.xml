@@ -81,6 +81,12 @@
             <version>4.11.0</version>
         </dependency>
 
+        <!-- Micrometer for Prometheus -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
         <!-- Common -->
         <dependency>
             <groupId>com.codereview</groupId>

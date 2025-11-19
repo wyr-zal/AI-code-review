@@ -1,0 +1,289 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "AI Code Review Platform Dashboard",
+    "tags": ["ai", "code-review", "microservices"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "5s",
+    "schemaVersion": 27,
+    "version": 1,
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "timepicker": {
+      "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
+    },
+    "templating": {
+      "list": [
+        {
+          "allValue": null,
+          "current": {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          "hide": 0,
+          "includeAll": true,
+          "multi": true,
+          "name": "service",
+          "options": [
+            {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            },
+            {
+              "selected": false,
+              "text": "gateway-service",
+              "value": "gateway-service"
+            },
+            {
+              "selected": false,
+              "text": "user-service",
+              "value": "user-service"
+            },
+            {
+              "selected": false,
+              "text": "ai-review-service",
+              "value": "ai-review-service"
+            }
+          ],
+          "query": "gateway-service,user-service,ai-review-service",
+          "type": "custom"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "服务状态",
+        "type": "stat",
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "targets": [
+          {
+            "expr": "up{job=~\"$service\"}",
+            "legendFormat": "{{instance}}",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "from": "",
+                "id": 0,
+                "op": "=",
+                "text": "Down",
+                "to": "",
+                "type": 1,
+                "value": "0"
+              },
+              {
+                "from": "",
+                "id": 1,
+                "op": "=",
+                "text": "Up",
+                "to": "",
+                "type": 1,
+                "value": "1"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "请求率",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 6
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(http_server_requests_total{job=~\"$service\"}[5m])) by (job, instance)",
+            "legendFormat": "{{job}}-{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "请求/秒"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "错误率",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 6
+        },
+        "targets": [
+          {
+            "expr": "sum(rate(http_server_requests_total{status=~\"5..\", job=~\"$service\"}[5m])) by (job, instance)",
+            "legendFormat": "{{job}}-{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "错误/秒"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "响应时间",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 14
+        },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=~\"$service\"}[5m])) by (job, instance, le))",
+            "legendFormat": "{{job}}-{{instance}} (95th percentile)",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "秒"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "JVM内存使用",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 14
+        },
+        "targets": [
+          {
+            "expr": "(sum(jvm_memory_used_bytes{area=\"heap\", job=~\"$service\"}) by (job, instance) / sum(jvm_memory_max_bytes{area=\"heap\", job=~\"$service\"}) by (job, instance)) * 100",
+            "legendFormat": "{{job}}-{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "百分比"
+          }
+        ],
+        "fieldConfig": {
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "数据库连接池",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 22
+        },
+        "targets": [
+          {
+            "expr": "max(max_over_time(hikaricp_connections{job=~\"$service\"}[1m])) by (job, instance)",
+            "legendFormat": "{{job}}-{{instance}} (最大连接数)",
+            "refId": "A"
+          },
+          {
+            "expr": "min(min_over_time(hikaricp_connections_active{job=~\"$service\"}[1m])) by (job, instance)",
+            "legendFormat": "{{job}}-{{instance}} (活跃连接数)",
+            "refId": "B"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "连接数"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "代码审查任务统计",
+        "type": "graph",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 22
+        },
+        "targets": [
+          {
+            "expr": "sum(increase(review_task_total[5m]))",
+            "legendFormat": "代码审查任务总数",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(increase(review_task_completed_total[5m]))",
+            "legendFormat": "完成的任务数",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(increase(review_task_failed_total[5m]))",
+            "legendFormat": "失败的任务数",
+            "refId": "C"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "任务数"
+          }
+        ]
+      }
+    ],
+    "links": [],
+    "refresh": "5s"
+  }
+}

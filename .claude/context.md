@@ -2,7 +2,11 @@
 
 > 快速恢复项目上下文，执行 `/load` 命令即可
 
-**最后更新**: 2025-11-11
+**最后更新**: 2025-11-19
+
+## 用户偏好
+- ⚠️ **每次只展示当前对话内容，不用展示之前的历史对话**
+- ⚠️ **不需要执行git操作（add、commit、push等），用户自己处理**
 
 ---
 
@@ -49,7 +53,84 @@
 
 ## 历史问题修复记录
 
-### 2025-11-11 (本次会话)
+### 2025-11-19 (本次会话)
+
+#### 监控系统集成
+
+**背景**：为平台添加 Prometheus + Grafana 监控系统
+
+**完成内容**：
+1. ✅ **配置类创建**
+   - `ActuatorConfig.java` - Actuator端点配置（用于user-service和ai-review-service）
+   - `MeterRegistryConfig.java` - Micrometer指标注册配置
+   - `MetricsUtils.java` - 监控指标工具类
+
+2. ✅ **Maven依赖**
+   - 所有服务添加 `micrometer-registry-prometheus` 依赖
+   - 主pom.xml添加版本管理 (1.9.12)
+
+3. ✅ **Actuator端点配置**
+   - gateway、user-service、ai-review-service 的 `application.yml` 全部配置 management 端点
+   - 暴露所有端点，启用Prometheus支持
+
+4. ✅ **Docker Compose监控栈**
+   - 创建 `docker-compose.monitoring.yml`
+   - 服务包括：Prometheus、Grafana、AlertManager、Node Exporter
+   - Exporter: MySQL、Redis、RabbitMQ
+   - 修复基础设施连接地址（192.168.100.128）
+
+5. ✅ **Prometheus配置**
+   - `prometheus.yml` - 监控所有微服务和基础设施
+   - `prometheus-rules.yml` - 告警规则（服务宕机、高QPS、高响应时间等）
+
+6. ✅ **Grafana配置**
+   - `ai-code-review-dashboard.json` - 监控仪表板
+   - 修复Prometheus查询表达式（使用正���匹配 `job=~"..."`）
+   - 自动加载数据源和仪表板
+
+7. ✅ **环境变量配置**
+   - 创建 `.env.monitoring.example` 示例文件
+
+**修改文件**：
+- ✅ `common/config/ActuatorConfig.java` (新建)
+- ✅ `common/config/MeterRegistryConfig.java` (新建)
+- ✅ `common/utils/MetricsUtils.java` (新建)
+- ✅ `common/pom.xml` (添加actuator和micrometer依赖)
+- ✅ `gateway/pom.xml` (添加micrometer依赖)
+- ✅ `user-service/pom.xml` (添加micrometer依赖)
+- ✅ `ai-review-service/pom.xml` (添加micrometer依赖)
+- ✅ `gateway/application.yml` (添加management配置)
+- ✅ `user-service/application.yml` (添加management配置)
+- ✅ `ai-review-service/application.yml` (添加management配置)
+- ✅ `pom.xml` (添加micrometer版本管理)
+- ✅ `docker-compose.monitoring.yml` (新建)
+- ✅ `monitoring/prometheus.yml` (新建)
+- ✅ `monitoring/prometheus-rules.yml` (新建)
+- ✅ `monitoring/alertmanager.yml` (新建)
+- ✅ `monitoring/grafana-dashboards/ai-code-review-dashboard.json` (新建)
+- ✅ `monitoring/grafana-dashboards/dashboards.yml` (新建)
+- ✅ `monitoring/grafana-datasources/prometheus.yml` (新建)
+- ✅ `monitoring/README.md` (新建)
+- ✅ `.env.monitoring.example` (新建)
+
+**启动监控系统**：
+```bash
+# 1. 配置环境变量
+cp .env.monitoring.example .env.monitoring
+# 编辑 .env.monitoring，设置MySQL密码等
+
+# 2. 启动监控服务
+docker-compose -f docker-compose.monitoring.yml up -d
+
+# 3. 访问监控界面
+# Prometheus: http://localhost:9090
+# Grafana: http://localhost:3000 (admin/admin)
+# AlertManager: http://localhost:9093
+```
+
+---
+
+### 2025-11-11
 
 #### 第一轮修复：数据库重复创建 & 时间不显示
 

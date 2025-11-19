@@ -2,6 +2,8 @@ server:
   port: 8000
 
 spring:
+  application:
+    name: gateway-service
   cloud:
     gateway:
       discovery:
@@ -39,6 +41,24 @@ spring:
       transport:
         dashboard: localhost:8090
         port: 8719
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      service: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
 
 # 日志配置
 logging:

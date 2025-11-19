@@ -5,3 +5,21 @@ spring:
   application:
     name: user-service
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      service: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+

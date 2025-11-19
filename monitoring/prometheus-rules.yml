@@ -1,0 +1,92 @@
+groups:
+  - name: ai-code-review-alerts
+    rules:
+      # 服务可用性告警
+      - alert: ServiceDown
+        expr: up{job=~"gateway-service|user-service|ai-review-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务 {{ $labels.job }} 不可用"
+          description: "服务 {{ $labels.job }} 已经宕机超过1分钟"
+
+      # 高QPS告警
+      - alert: HighQPS
+        expr: sum(rate(http_requests_total{job=~"gateway-service|user-service|ai-review-service"}[5m])) > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "系统QPS过高"
+          description: "系统QPS为 {{ $value }}，超过阈值100"
+
+      # 高响应时间告警
+      - alert: HighResponseTime
+        expr: rate(http_request_duration_seconds_sum{job=~"gateway-service|user-service|ai-review-service"}[5m]) / rate(http_request_duration_seconds_count{job=~"gateway-service|user-service|ai-review-service"}[5m]) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "服务响应时间过长"
+          description: "服务 {{ $labels.job }} 平均响应时间为 {{ $value }}s，超过阈值1s"
+
+      # 高内存使用率告警
+      - alert: HighMemoryUsage
+        expr: sum(jvm_memory_used_bytes{job=~"gateway-service|user-service|ai-review-service"}) / sum(jvm_memory_max_bytes{job=~"gateway-service|user-service|ai-review-service"}) * 100 > 80
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM内存使用率过高"
+          description: "JVM内存使用率为 {{ $value }}%，超过阈值80%"
+
+      # 高CPU使用率告警
+      - alert: HighCpuUsage
+        expr: sum(rate(process_cpu_seconds_total{job=~"gateway-service|user-service|ai-review-service"}[5m])) * 100 > 80
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU使用率过高"
+          description: "CPU使用率为 {{ $value }}%，超过阈值80%"
+
+      # 错误率告警
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job=~"gateway-service|user-service|ai-review-service",status=~"5.."}[5m]) / rate(http_requests_total{job=~"gateway-service|user-service|ai-review-service"}[5m]) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务错误率过高"
+          description: "服务 {{ $labels.job }} 错误率为 {{ $value }}%，超过阈值5%"
+
+      # 数据库连接告警
+      - alert: DatabaseConnectionFailure
+        expr: up{job="mysql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "数据库连接失败"
+          description: "MySQL数据库连接失败，请检查数据库服务"
+
+      # Redis连接告警
+      - alert: RedisConnectionFailure
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis连接失败"
+          description: "Redis连接失败，请检查Redis服务"
+
+      # RabbitMQ连接告警
+      - alert: RabbitMQConnectionFailure
+        expr: up{job="rabbitmq"} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RabbitMQ连接失败"
+          description: "RabbitMQ连接失败，请检查RabbitMQ服务"

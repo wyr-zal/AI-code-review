@@ -1,15 +1,20 @@
-# Maven
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
+# ===================== 操作系统文件 =====================
+# Mac
+.DS_Store
 
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+nul
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*~
+
+# ===================== 开发环境文件 =====================
 # IDEA
 .idea/
 *.iws
@@ -33,27 +38,23 @@ nbdist/
 
 # VS Code
 .vscode/
+.history/
+*.sublime-*
 
-# Mac
-.DS_Store
+# ===================== 后端相关 (Maven/Java) =====================
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
 
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# Logs
-logs/
-*.log
-log/
-
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*~
-
-# Package Files
+# 包文件
 *.jar
 *.war
 *.ear
@@ -61,11 +62,58 @@ log/
 *.tar.gz
 *.rar
 
-# Local environment files
-.env
+# ===================== 前端相关 =====================
+# 依赖目录
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
 
+# 包管理器锁文件
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 构建输出
+dist/
+build/
+.next/
+out/
+.nuxt/
+.nuxt/
+.output/
+.vuepress/dist
+
+# 缓存文件
+.cache/
+.parcel-cache/
+
+# 日志文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# ===================== 环境配置文件 =====================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===================== 日志文件 =====================
+logs/
+*.log
+log/
+
+# ===================== 其他 =====================
 # 系统文件
-nul
 Thumbs.db
 .DS_Store
 *.tmp
