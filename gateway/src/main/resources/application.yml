@@ -60,6 +60,48 @@ management:
       prometheus:
         enabled: true
 
+# API 限流配置
+rate-limit:
+  enabled: true
+  # 默认限流规则
+  default-rule:
+    window-seconds: 60
+    max-requests: 100
+    type: IP
+  # 路径特定规则
+  rules:
+    # 代码审查接口 - 更严格的限流
+    "/api/review/submit":
+      window-seconds: 60
+      max-requests: 10
+      type: USER
+    "/api/review/sync":
+      window-seconds: 60
+      max-requests: 5
+      type: USER
+    "/api/review/batch":
+      window-seconds: 60
+      max-requests: 3
+      type: USER
+    # 用户登录接口 - 防止暴力破解
+    "/api/user/login":
+      window-seconds: 60
+      max-requests: 10
+      type: IP
+    "/api/user/register":
+      window-seconds: 60
+      max-requests: 5
+      type: IP
+    # 查询接口 - 相对宽松
+    "/api/review/tasks":
+      window-seconds: 60
+      max-requests: 60
+      type: USER
+    "/api/review/task/**":
+      window-seconds: 60
+      max-requests: 60
+      type: USER
+
 # 日志配置
 logging:
   level:

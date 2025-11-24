@@ -2,7 +2,7 @@
 
 > 快速恢复项目上下文，执行 `/load` 命令即可
 
-**最后更新**: 2025-11-19
+**最后更新**: 2025-11-20
 
 ## 用户偏好
 - ⚠️ **每次只展示当前对话内容，不用展示之前的历史对话**
@@ -53,7 +53,139 @@
 
 ## 历史问题修复记录
 
-### 2025-11-19 (本次会话)
+### 2025-11-20 (本次会话)
+
+#### 高优先级任务完成进度
+
+**任务列表**：
+1. ✅ 启动并验证监控系统
+2. ✅ 完善Swagger文档
+3. ✅ 添加单元测试
+4. ✅ 实现批量代码审查功能（已有，确认完整性）
+5. ✅ 实现API访问频率限制
+
+---
+
+#### API 访问频率限制实现
+
+**背景**：为平台添加基于 Redis 的 API 限流功能，防止接口滥用
+
+**完成内容**：
+1. ✅ **限流配置类**
+   - `RateLimitConfig.java` - 支持路径特定规则配置
+   - 三种限流类型：IP、USER、GLOBAL
+   - 灵活配置时间窗口和请求限制
+
+2. ✅ **限流过滤器**
+   - `RateLimitFilter.java` - 基于 Redis ZSet 的滑动窗口算法
+   - 精确限流，自动清理过期数据
+   - Redis 故障时自动降级放行
+
+3. ✅ **限流规则配置**
+   - `gateway/application.yml` - 详细的路径限流规则
+   - 代码审查接口：10次/分钟（USER）
+   - 同步审查接口：5次/分钟（USER）
+   - 批量审查接口：3次/分钟（USER）
+   - 登录接口：10次/分钟（IP，防暴力破解）
+   - 注册接口：5次/分钟（IP，防恶意注册）
+
+**修改文件**：
+- ✅ `gateway/config/RateLimitConfig.java` (新建)
+- ✅ `gateway/filter/RateLimitFilter.java` (新建)
+- ✅ `gateway/application.yml` (添加限流配置)
+
+**限流规则示例**：
+```yaml
+rate-limit:
+  enabled: true
+  rules:
+    "/api/review/submit":
+      window-seconds: 60
+      max-requests: 10
+      type: USER
+```
+
+**测试方法**：
+```bash
+# 快速发送多次请求测试限流
+for i in {1..11}; do
+  curl -X POST http://localhost:8000/api/review/submit \
+    -H "Authorization: Bearer TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"title":"test",...}'
+done
+# 第 11 次请求应返回 429 状态码
+```
+
+---
+
+#### 单元测试完善
+
+**背景**：完善测试覆盖，添加 Controller 层、批量审查、导出功能的测试
+
+**完成内容**：
+1. ✅ **UserControllerTest（新增 8 个测试用例）**
+   - 注册功能测试（成功、参数校验）
+   - 登录功能测试（成功、参数校验）
+   - 登出功能测试（成功、未登录）
+   - 获取用户信息测试（成功、未登录）
+
+2. ✅ **ReviewControllerTest（新增 10 个测试用例）**
+   - 提交审查测试（成功、未登录、参数校验）
+   - 同步审查测试
+   - 获取任务详情测试（成功、未登录）
+   - 查询任务列表测试（成功、带筛选）
+   - 删除任务测试（成功、未登录）
+
+3. ✅ **ReviewServiceImplTest（新增 8 个测试用例）**
+   - 批量审查测试（成功、空文件列表）
+   - PDF 导出测试（成功、参数校验）
+   - Excel 导出测试（成功）
+   - 导出权限测试（任务不存在、无权限）
+
+**修改文件**：
+- ✅ `user-service/controller/UserControllerTest.java` (新建，8 个测试)
+- ✅ `ai-review-service/controller/ReviewControllerTest.java` (新建，10 个测试)
+- ✅ `ai-review-service/service/impl/ReviewServiceImplTest.java` (扩展，新增 8 个测试)
+
+**测试统计**：
+- 总测试用例：32 个
+- UserServiceImplTest: 9 个
+- UserControllerTest: 8 个（新增）
+- ReviewServiceImplTest: 14 个（6 个已有 + 8 个新增）
+- ReviewControllerTest: 10 个（新增）
+
+**运行测试**：
+```bash
+# 运行所有测试
+mvn test
+
+# 运行特定测试类
+mvn test -Dtest=UserControllerTest
+mvn test -Dtest=ReviewControllerTest
+```
+
+---
+
+#### 批量代码审查功能确认
+
+**背景**：确认批量审查功能的完整性
+
+**确认结果**：✅ 功能完整
+- ✅ 后端 Service 层已实现（3 个重载方法）
+- ✅ 后端 Controller 已实现（`POST /api/review/batch`）
+- ✅ 前端 UI 已实现（独立的批量文件审查标签页）
+- ✅ 支持最多 10 个文件同时上传
+- ✅ 支持异步和同步两种审查模式
+
+**相关文件**：
+- `ai-review-service/service/impl/ReviewServiceImpl.java:89-222`
+- `ai-review-service/controller/ReviewController.java:82-107`
+- `frontend/src/views/Review.vue:88-170`
+
+---
+
+### 2025-11-19
 
 #### 高优先级任务完成进度
 

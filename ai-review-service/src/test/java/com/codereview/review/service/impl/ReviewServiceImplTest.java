@@ -13,10 +13,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -182,5 +187,133 @@ class ReviewServiceImplTest {
         assertEquals("无权删除此任务", exception.getMessage());
         verify(reviewTaskMapper, times(1)).selectById(1L);
         verify(reviewTaskMapper, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void testSubmitBatchReview_Success() throws IOException {
+        // Given
+        MockMultipartFile file1 = new MockMultipartFile(
+                "file1", "Test1.java", "text/plain", "public class Test1 {}".getBytes());
+        MockMultipartFile file2 = new MockMultipartFile(
+                "file2", "Test2.java", "text/plain", "public class Test2 {}".getBytes());
+        List<MockMultipartFile> files = Arrays.asList(file1, file2);
+
+        when(reviewTaskMapper.insert(any(ReviewTask.class))).thenReturn(1);
+
+        // When
+        List<Long> taskIds = reviewService.submitBatchReviewTask(
+                "批量测试", "Java", "Qwen3-Coder", true,
+                Arrays.asList(file1, file2), 1L);
+
+        // Then
+        assertNotNull(taskIds);
+        assertEquals(2, taskIds.size());
+        verify(reviewTaskMapper, times(2)).insert(any(ReviewTask.class));
+    }
+
+    @Test
+    void testSubmitBatchReview_EmptyFiles() {
+        // Given
+        List<MultipartFile> emptyFiles = Collections.emptyList();
+
+        // When
+        List<Long> taskIds = reviewService.submitBatchReviewTask(
+                "批量测试", "Java", "Qwen3-Coder", true,
+                emptyFiles, 1L);
+
+        // Then
+        assertNotNull(taskIds);
+        assertEquals(0, taskIds.size());
+        verify(reviewTaskMapper, never()).insert(any(ReviewTask.class));
+    }
+
+    @Test
+    void testExportReviewReport_PDF_Success() {
+        // Given
+        List<Long> taskIds = Arrays.asList(1L);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        mockTask.setQualityScore(85);
+        mockTask.setSecurityScore(90);
+        mockTask.setPerformanceScore(80);
+        mockTask.setReviewResult("{\"summary\":\"测试总结\"}");
+
+        when(reviewTaskMapper.selectById(1L)).thenReturn(mockTask);
+
+        // When
+        reviewService.exportReviewReport(taskIds, "pdf", false, 1L, response);
+
+        // Then
+        assertEquals("application/pdf", response.getContentType());
+        assertTrue(response.getHeader("Content-Disposition").contains("attachment"));
+        verify(reviewTaskMapper, times(1)).selectById(1L);
+    }
+
+    @Test
+    void testExportReviewReport_Excel_Success() {
+        // Given
+        List<Long> taskIds = Arrays.asList(1L);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        mockTask.setQualityScore(85);
+        mockTask.setSecurityScore(90);
+        mockTask.setPerformanceScore(80);
+
+        when(reviewTaskMapper.selectById(1L)).thenReturn(mockTask);
+
+        // When
+        reviewService.exportReviewReport(taskIds, "excel", false, 1L, response);
+
+        // Then
+        assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                response.getContentType());
+        assertTrue(response.getHeader("Content-Disposition").contains("attachment"));
+        verify(reviewTaskMapper, times(1)).selectById(1L);
+    }
+
+    @Test
+    void testExportReviewReport_EmptyTaskIds() {
+        // Given
+        List<Long> emptyTaskIds = Collections.emptyList();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            reviewService.exportReviewReport(emptyTaskIds, "pdf", false, 1L, response);
+        });
+        assertEquals("任务ID列表不能为空", exception.getMessage());
+        verify(reviewTaskMapper, never()).selectById(anyLong());
+    }
+
+    @Test
+    void testExportReviewReport_TaskNotExists() {
+        // Given
+        List<Long> taskIds = Arrays.asList(999L);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(reviewTaskMapper.selectById(999L)).thenReturn(null);
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            reviewService.exportReviewReport(taskIds, "pdf", false, 1L, response);
+        });
+        assertTrue(exception.getMessage().contains("任务不存在"));
+        verify(reviewTaskMapper, times(1)).selectById(999L);
+    }
+
+    @Test
+    void testExportReviewReport_NoPermission() {
+        // Given
+        List<Long> taskIds = Arrays.asList(1L);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        when(reviewTaskMapper.selectById(1L)).thenReturn(mockTask);
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            reviewService.exportReviewReport(taskIds, "pdf", false, 2L, response);  // 不同的userId
+        });
+        assertTrue(exception.getMessage().contains("无权访问任务"));
+        verify(reviewTaskMapper, times(1)).selectById(1L);
     }
 }
